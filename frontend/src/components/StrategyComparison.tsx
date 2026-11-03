@@ -20,6 +20,8 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { BreakerTransition, StrategyResult } from '../types/simulation';
+import { useI18n } from '../i18n/I18nContext';
+import { Translations } from '../i18n/types';
 
 interface StrategyComparisonProps {
   results: StrategyResult[];
@@ -89,7 +91,7 @@ function formatDeltaNum(val: number, baseVal: number, unit = '', invertGood = tr
 }
 
 // Compute factual, deterministic observations strictly from the calculated StrategyResult metrics.
-function computeMeasuredFacts(results: StrategyResult[]): string[] {
+function computeMeasuredFacts(results: StrategyResult[], t: Translations): string[] {
   const byId = Object.fromEntries(results.map((r) => [r.strategyId, r]));
   const base = byId['baseline'];
   const retry = byId['retry'];
@@ -106,16 +108,32 @@ function computeMeasuredFacts(results: StrategyResult[]): string[] {
     const deltaSuccPct = (rOv.successRate - bOv.successRate) * 100;
     if (deltaSuccPct > 1.0) {
       facts.push(
-        `Retry improved logical request success rate from ${(bOv.successRate * 100).toFixed(1)}% to ${(rOv.successRate * 100).toFixed(1)}% (+${deltaSuccPct.toFixed(1)}%) by executing ${rOv.totalRetries.toLocaleString()} retries (${rOv.retryAmplificationFactor.toFixed(2)}x call amplification).`
+        t.strategyComparison.facts.retryImprove(
+          (bOv.successRate * 100).toFixed(1),
+          (rOv.successRate * 100).toFixed(1),
+          deltaSuccPct.toFixed(1),
+          rOv.totalRetries.toLocaleString(),
+          rOv.retryAmplificationFactor.toFixed(2)
+        )
       );
     } else if (rOv.totalRetries > 0 && Math.abs(deltaSuccPct) <= 1.0) {
       facts.push(
-        `Retry executed ${rOv.totalRetries.toLocaleString()} extra attempts (${rOv.retryAmplificationFactor.toFixed(2)}x call amplification) without improving logical success rate (${(rOv.successRate * 100).toFixed(1)}% vs. ${(bOv.successRate * 100).toFixed(1)}% Baseline).`
+        t.strategyComparison.facts.retryFutility(
+          rOv.totalRetries.toLocaleString(),
+          rOv.retryAmplificationFactor.toFixed(2),
+          (rOv.successRate * 100).toFixed(1),
+          (bOv.successRate * 100).toFixed(1)
+        )
       );
     }
     if (rOv.maxQueueLength > bOv.maxQueueLength || rOv.timeoutCount > bOv.timeoutCount * 1.2) {
       facts.push(
-        `Retry increased peak queue length from ${bOv.maxQueueLength} to ${rOv.maxQueueLength} and total timeouts from ${bOv.timeoutCount} to ${rOv.timeoutCount}.`
+        t.strategyComparison.facts.retryOverload(
+          bOv.maxQueueLength,
+          rOv.maxQueueLength,
+          bOv.timeoutCount,
+          rOv.timeoutCount
+        )
       );
     }
   }
@@ -125,7 +143,12 @@ function computeMeasuredFacts(results: StrategyResult[]): string[] {
     if (cbOv.circuitBreakerRejections > 0) {
       const savedCalls = bOv.targetEdgeCalls - cbOv.targetEdgeCalls;
       facts.push(
-        `Circuit Breaker fast-rejected ${cbOv.circuitBreakerRejections.toLocaleString()} calls while OPEN, reducing target downstream calls by ${savedCalls.toLocaleString()} (${bOv.targetEdgeCalls.toLocaleString()} → ${cbOv.targetEdgeCalls.toLocaleString()}).`
+        t.strategyComparison.facts.cbShedding(
+          cbOv.circuitBreakerRejections.toLocaleString(),
+          savedCalls.toLocaleString(),
+          bOv.targetEdgeCalls.toLocaleString(),
+          cbOv.targetEdgeCalls.toLocaleString()
+        )
       );
     }
   }
@@ -135,7 +158,11 @@ function computeMeasuredFacts(results: StrategyResult[]): string[] {
     const rcOv = retryCb.metrics.overall;
     if (rOv.totalRetries > rcOv.totalRetries && rcOv.circuitBreakerRejections > 0) {
       facts.push(
-        `Combining Retry + Circuit Breaker suppressed ${rOv.totalRetries - rcOv.totalRetries} futile retries while the breaker was OPEN (retries reduced from ${rOv.totalRetries} to ${rcOv.totalRetries}).`
+        t.strategyComparison.facts.combinedSuppression(
+          rOv.totalRetries - rcOv.totalRetries,
+          rOv.totalRetries,
+          rcOv.totalRetries
+        )
       );
     }
   }
@@ -144,14 +171,24 @@ function computeMeasuredFacts(results: StrategyResult[]): string[] {
     const ffOv = failFast.metrics.overall;
     if (ffOv.failureP95LatencyMs > 0 && bOv.failureP95LatencyMs > 0 && ffOv.failureP95LatencyMs < bOv.failureP95LatencyMs - 20) {
       facts.push(
-        `Fail-Fast reduced failed-request p95 latency from ${bOv.failureP95LatencyMs.toFixed(1)}ms to ${ffOv.failureP95LatencyMs.toFixed(1)}ms (overall p95: ${bOv.p95LatencyMs.toFixed(1)}ms → ${ffOv.p95LatencyMs.toFixed(1)}ms).`
+        t.strategyComparison.facts.failFastSpeedup(
+          bOv.failureP95LatencyMs.toFixed(1),
+          ffOv.failureP95LatencyMs.toFixed(1),
+          bOv.p95LatencyMs.toFixed(1),
+          ffOv.p95LatencyMs.toFixed(1)
+        )
       );
     }
   }
 
   if (facts.length === 0) {
     facts.push(
-      `All ${results.length} strategies completed ${bOv.completedRequests.toLocaleString()} logical requests with ${(bOv.successRate * 100).toFixed(1)}% success rate and ${bOv.p95LatencyMs.toFixed(1)}ms p95 latency.`
+      t.strategyComparison.facts.allHealthy(
+        results.length,
+        bOv.completedRequests.toLocaleString(),
+        (bOv.successRate * 100).toFixed(1),
+        bOv.p95LatencyMs.toFixed(1)
+      )
     );
   }
 
@@ -164,18 +201,23 @@ export const StrategyComparison: React.FC<StrategyComparisonProps> = ({
   onSelectStrategy,
   durationSec,
 }) => {
+  const { t } = useI18n();
   if (!results || results.length === 0) return null;
 
   const baseline = results.find((r) => r.strategyId === 'baseline') || results[0];
   const baseOv = baseline.metrics.overall;
   const anyTruncated = results.some((r) => r.executionMeta.truncated);
-  const measuredFacts = computeMeasuredFacts(results);
+  const measuredFacts = computeMeasuredFacts(results, t);
 
   const chartData = results.map((r) => {
     const ov = r.metrics.overall;
+    const stratName =
+      t.strategyComparison.strategies[r.strategyId]?.shortName ||
+      STRATEGY_SHORT_NAMES[r.strategyId] ||
+      r.strategyId;
     return {
       strategyId: r.strategyId,
-      name: STRATEGY_SHORT_NAMES[r.strategyId] || r.strategyId,
+      name: stratName,
       successRatePct: Number((ov.successRate * 100).toFixed(1)),
       p95LatencyMs: ov.p95LatencyMs,
       downstreamCalls: ov.totalDownstreamCalls,
@@ -207,7 +249,7 @@ export const StrategyComparison: React.FC<StrategyComparisonProps> = ({
           <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
           <div>
             <div className="font-bold uppercase tracking-wider text-amber-300">
-              Simulation Truncated by Safety Event Limit
+              {t.strategyComparison.truncatedWarning}
             </div>
             <p className="mt-0.5 text-amber-200/90">
               One or more strategies reached the maximum discrete event limit before all logical requests completed. Unfinished requests are counted as failures so truncated runs are never mistaken for healthy completions.
@@ -222,10 +264,10 @@ export const StrategyComparison: React.FC<StrategyComparisonProps> = ({
           <div>
             <h2 className="text-xs font-bold uppercase tracking-wider text-indigo-300 flex items-center gap-1.5">
               <Sparkles className="w-4 h-4 text-indigo-400" />
-              Resilience Strategy Comparison (Same Traffic, Fault & Coordinate RNG Seed)
+              {t.strategyComparison.header}
             </h2>
             <p className="text-[11px] text-slate-400 mt-0.5">
-              Click any strategy row or pill to inspect its topology replay, time-series charts, and discrete event stream below.
+              {t.strategyComparison.subtitle}
             </p>
           </div>
 
@@ -233,6 +275,10 @@ export const StrategyComparison: React.FC<StrategyComparisonProps> = ({
           <div className="flex flex-wrap items-center gap-1.5" data-testid="strategy-selector-pills">
             {results.map((r) => {
               const isSelected = r.strategyId === activeStrategyId;
+              const shortTitle =
+                t.strategyComparison.strategies[r.strategyId]?.shortName ||
+                STRATEGY_SHORT_NAMES[r.strategyId] ||
+                r.strategyId;
               return (
                 <button
                   key={r.strategyId}
@@ -251,7 +297,7 @@ export const StrategyComparison: React.FC<StrategyComparisonProps> = ({
                       backgroundColor: STRATEGY_COLORS[r.strategyId] || '#818cf8',
                     }}
                   />
-                  {STRATEGY_SHORT_NAMES[r.strategyId] || r.strategyId}
+                  {shortTitle}
                 </button>
               );
             })}
@@ -263,16 +309,16 @@ export const StrategyComparison: React.FC<StrategyComparisonProps> = ({
           <table className="w-full text-left border-collapse text-xs" data-testid="strategy-comparison-table">
             <thead>
               <tr className="border-b border-slate-800 text-[11px] text-slate-400">
-                <th className="py-2 pr-3">Strategy</th>
-                <th className="py-2 px-2 text-right">Logical Success</th>
+                <th className="py-2 pr-3">{t.strategyComparison.colStrategy}</th>
+                <th className="py-2 px-2 text-right">{t.strategyComparison.colLogicalSuccess}</th>
                 <th className="py-2 px-2 text-right">Error Rate</th>
-                <th className="py-2 px-2 text-right">p50 / p95 / p99 (ms)</th>
-                <th className="py-2 px-2 text-right">Succ / Fail p95</th>
-                <th className="py-2 px-2 text-right">Total Calls</th>
+                <th className="py-2 px-2 text-right">{t.strategyComparison.colP95Latency}</th>
+                <th className="py-2 px-2 text-right">{t.strategyComparison.colP95Split}</th>
+                <th className="py-2 px-2 text-right">{t.strategyComparison.colDownstreamCalls}</th>
                 <th className="py-2 px-2 text-right">Retries (Amp)</th>
-                <th className="py-2 px-2 text-right">CB Rejects</th>
+                <th className="py-2 px-2 text-right">{t.strategyComparison.colCbRejections}</th>
                 <th className="py-2 px-2 text-right">Timeouts</th>
-                <th className="py-2 pl-2 text-right">Max Worker / Queue</th>
+                <th className="py-2 pl-2 text-right">{t.strategyComparison.colPeakQueue}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/70 font-mono">
@@ -280,6 +326,10 @@ export const StrategyComparison: React.FC<StrategyComparisonProps> = ({
                 const ov = r.metrics.overall;
                 const isSelected = r.strategyId === activeStrategyId;
                 const isBase = r.strategyId === 'baseline';
+                const stratMeta = t.strategyComparison.strategies[r.strategyId];
+                const displayName = stratMeta?.shortName || STRATEGY_SHORT_NAMES[r.strategyId] || r.strategyId;
+                const fullDesc = stratMeta?.fullName || r.strategyName;
+
                 return (
                   <tr
                     key={r.strategyId}
@@ -302,10 +352,10 @@ export const StrategyComparison: React.FC<StrategyComparisonProps> = ({
                         />
                         <div>
                           <div className="font-bold text-slate-100 flex items-center gap-1.5">
-                            {STRATEGY_SHORT_NAMES[r.strategyId] || r.strategyId}
+                            {displayName}
                             {isSelected && (
                               <span className="text-[9px] bg-indigo-500/30 border border-indigo-400/50 text-indigo-200 px-1.5 py-0.2 rounded uppercase">
-                                Active
+                                {t.strategyComparison.activeView}
                               </span>
                             )}
                             {r.executionMeta.truncated && (
@@ -315,7 +365,7 @@ export const StrategyComparison: React.FC<StrategyComparisonProps> = ({
                             )}
                           </div>
                           <div className="text-[10px] text-slate-400">
-                            {r.strategyName}
+                            {fullDesc}
                           </div>
                         </div>
                       </div>
@@ -448,8 +498,11 @@ export const StrategyComparison: React.FC<StrategyComparisonProps> = ({
         >
           <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-indigo-300 mb-1.5">
             <Info className="w-3.5 h-3.5 text-indigo-400" />
-            Key Observations from Measured Simulation Data
+            {t.strategyComparison.observedFactsHeader}
           </div>
+          <p className="text-[10px] text-slate-400 mb-2">
+            {t.strategyComparison.observedFactsSubtext}
+          </p>
           <ul className="space-y-1 text-xs text-slate-300 list-disc list-inside">
             {measuredFacts.map((fact, idx) => (
               <li key={idx} className="leading-relaxed">
@@ -465,10 +518,10 @@ export const StrategyComparison: React.FC<StrategyComparisonProps> = ({
         {/* Chart A: Success Rate (%) vs Strategy */}
         <div className="rounded-xl bg-slate-900/90 border border-slate-800 p-4">
           <h3 className="text-xs font-bold uppercase tracking-wider text-slate-200 mb-1">
-            Logical Success Rate & p95 Latency
+            {t.strategyComparison.chartSuccessRate} & {t.strategyComparison.chartP95}
           </h3>
           <p className="text-[11px] text-slate-400 mb-3">
-            Comparison across all 5 resilience strategies
+            {t.strategyComparison.chartTitle}
           </p>
           <div className="h-48 w-full">
             <ResponsiveContainer width="100%" height="100%">
@@ -571,10 +624,10 @@ export const StrategyComparison: React.FC<StrategyComparisonProps> = ({
             <div>
               <h3 className="text-xs font-bold uppercase tracking-wider text-slate-200 flex items-center gap-1.5">
                 <GitCommit className="w-4 h-4 text-violet-400" />
-                Circuit Breaker State Timeline
+                {t.strategyComparison.cbTimelineHeader}
               </h3>
               <p className="text-[11px] text-slate-400">
-                CLOSED → OPEN → HALF_OPEN → CLOSED transitions
+                {t.strategyComparison.cbTimelineSubtext}
               </p>
             </div>
             <span className="text-[10px] font-mono text-violet-300 bg-violet-500/15 border border-violet-500/30 px-2 py-0.5 rounded">

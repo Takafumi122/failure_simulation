@@ -1,0 +1,273 @@
+import { Translations } from '../types';
+
+export const en: Translations = {
+  nav: {
+    title: 'FailureLab',
+    subtitle:
+      'Distributed Systems Cascading Failure & Resilience Strategy Simulator (Retry / Circuit Breaker / Fail-Fast)',
+    engineBadge: 'Engine',
+    engineTech: 'Go container/heap + Coordinate RNG',
+    strategiesCount: '5 Strategies',
+    langSwitch: 'Language',
+    langEn: 'EN',
+    langJa: '日本語',
+    errorPrefix: 'Simulation Error: ',
+    loadingApp: 'Loading FailureLab topology and scenarios...',
+  },
+  scenarioGallery: {
+    header:
+      'Interactive Scenario Gallery — Click a Preset to Load & Compare 5 Strategies',
+    description:
+      'FailureLab simulates a 5-tier microservice chain in virtual time. Select any scenario below to observe how faults propagate upstream and how Retry, Circuit Breaker, and Fail-Fast behave under identical traffic and random seeds.',
+    activeBadge: 'Loaded',
+    scenarios: {
+      'transient-failure': {
+        shortTitle: 'Transient Failure',
+        category: 'Retry Wins',
+        description:
+          'Between 6s and 18s, Feature DB experiences a 35% probabilistic error rate without latency spikes. Baseline drops to ~82.5% logical success, whereas Retry with Exponential Backoff + Jitter recovers logical success rate to ~98.9%.',
+        highlight: 'Retry Recovers Transient Errors (+16% Success)',
+      },
+      'prolonged-outage': {
+        shortTitle: 'Prolonged Outage',
+        category: 'Retry Futility vs. CB',
+        description:
+          'From 4s to 20s, Feature DB suffers a 100% outage. Naive Retry multiplies Feature DB call attempts nearly 3x without improving logical success rate at all. Circuit Breaker trips OPEN after 5 consecutive failures and blocks >500 futile downstream calls.',
+        highlight: 'Retry Wastes 3x Calls; CB Sheds Load',
+      },
+      'retry-storm': {
+        shortTitle: 'Retry Storm',
+        category: 'Queue Overload & Fail-Fast',
+        description:
+          'Under 50 RPS traffic, Feature DB slows down by +220ms (exceeding its 160ms timeout). Retry triggers a Retry Storm that floods the downstream queue, inflates timeouts 3.5x, and exhausts upstream workers—while Fail-Fast (90ms) and Circuit Breaker keep p95 latency low.',
+        highlight: 'Retry Storm Amplifies Queue & Timeouts',
+      },
+      'circuit-breaker-recovery': {
+        shortTitle: 'CB Recovery',
+        category: 'State Transitions',
+        description:
+          'Feature DB suffers an 8-second blackout, then fully recovers. Demonstrates the complete lifecycle: CLOSED -> trips OPEN on errors -> sleeps during cooldown -> HALF-OPEN allows probe calls -> returns to CLOSED upon probe success.',
+        highlight: 'CLOSED -> OPEN -> HALF-OPEN -> CLOSED',
+      },
+      'healthy-system': {
+        shortTitle: 'Healthy System',
+        category: 'Baseline Benchmark',
+        description:
+          'All services operate with zero faults. Validates nominal latency, queue lengths, and proves that resilience mechanisms introduce zero false-positive rejections or overhead in normal operating conditions.',
+        highlight: '100% Success, Zero Overheads',
+      },
+    },
+  },
+  controlPanel: {
+    title: 'Simulation Parameters',
+    customParams: 'Custom Parameters',
+    selectPreset: 'Scenario Presets',
+    workloadHeader: 'Workload Parameters',
+    durationSec: 'Duration (sec)',
+    durationSecHint: '1 to 300 seconds',
+    rps: 'Traffic Rate (RPS)',
+    rpsHint: '1 to 500 requests/sec',
+    seed: 'RNG Seed',
+    seedHint: 'Coordinate RNG seed',
+    faultHeader: 'Fault Injection',
+    targetService: 'Target Service',
+    faultType: 'Fault Type',
+    faultTypeNone: 'None (Healthy)',
+    faultTypeOutage: 'Complete Outage (100% Failure)',
+    faultTypeLatency: 'Latency Spike (Slowdown)',
+    faultTypeErrorRate: 'Probabilistic Errors',
+    faultWindow: 'Fault Window (Start ~ End)',
+    startSec: 'Start sec',
+    endSec: 'End sec',
+    addedLatencyMs: 'Added Latency (ms)',
+    errorRatePct: 'Error Rate (%)',
+    resilienceHeader: 'Resilience Policies',
+    targetEdgeLabel: 'Applied Edge: Recommendation -> Feature DB',
+    retryGroup: 'Retry with Backoff + Jitter',
+    maxRetries: 'Max Retries',
+    initialBackoffMs: 'Initial Backoff (ms)',
+    maxBackoffMs: 'Max Backoff (ms)',
+    backoffMultiplier: 'Backoff Multiplier',
+    jitterLabel: 'Full Jitter (Randomized)',
+    cbGroup: 'Circuit Breaker',
+    cbFailureThreshold: 'Consecutive Failure Threshold',
+    cbOpenTimeoutMs: 'Open Timeout / Cooldown (ms)',
+    cbHalfOpenMaxCalls: 'Half-Open Probe Limit',
+    cbHalfOpenSuccessThreshold: 'Half-Open Success Threshold',
+    failFastGroup: 'Fail-Fast Policy',
+    failFastTimeoutMs: 'Attempt Timeout (ms)',
+    serviceLimitsHeader: 'Advanced Service Limits (Workers & Queues)',
+    serviceLimitWorker: 'workers',
+    serviceLimitQueue: 'queue',
+    serviceLimitTimeout: 'timeout',
+    exportJson: 'Export JSON',
+    importJson: 'Import JSON',
+    runSimulation: 'Run Simulation',
+    simulating: 'Simulating...',
+  },
+  strategyComparison: {
+    header: '5 Resilience Strategies Side-by-Side Comparison',
+    subtitle:
+      'All 5 strategies run against the exact same injected faults, traffic arrival schedule, and random seed.',
+    activeView: 'ACTIVE VIEW',
+    truncatedWarning:
+      'Simulation reached safety event or time limit; results were safely truncated.',
+    colStrategy: 'Strategy',
+    colLogicalSuccess: 'Logical Success',
+    colP95Latency: 'Overall p95',
+    colP95Split: 'p95 Succ / Fail',
+    colDownstreamCalls: 'Target Edge Calls',
+    colCbRejections: 'CB Fast-Rejections',
+    colPeakQueue: 'Peak Queue / Drop',
+    retriesLabel: 'retries',
+    amplificationLabel: 'amplification',
+    observedFactsHeader: 'Measured Facts & Architectural Trade-offs',
+    observedFactsSubtext:
+      'Computed deterministically from simulation results (zero mock or hallucinated values):',
+    cbTimelineHeader: 'Circuit Breaker State Transition Timeline',
+    cbTimelineSubtext:
+      'Chronological transition trace on target edge (Recommendation -> Feature DB):',
+    cbStateClosed: 'CLOSED (Normal)',
+    cbStateOpen: 'OPEN (Fast-Reject)',
+    cbStateHalfOpen: 'HALF-OPEN (Probe)',
+    chartTitle: 'Key Comparison Metrics across 5 Strategies',
+    chartSuccessRate: 'Logical Success Rate (%)',
+    chartP95: 'p95 Latency (ms)',
+    chartCalls: 'Downstream Calls',
+    facts: {
+      retryImprove: (fromPct, toPct, deltaPct, retries, amp) =>
+        `Retry improved logical request success rate from ${fromPct}% to ${toPct}% (+${deltaPct}%) by executing ${retries} retries (${amp}x call amplification).`,
+      retryFutility: (retries, amp, rPct, bPct) =>
+        `Retry executed ${retries} extra attempts (${amp}x call amplification) without improving logical success rate (${rPct}% vs. ${bPct}% Baseline).`,
+      retryOverload: (bQueue, rQueue, bTimeout, rTimeout) =>
+        `Retry increased peak queue length from ${bQueue} to ${rQueue} and total timeouts from ${bTimeout} to ${rTimeout}.`,
+      cbShedding: (rejections, saved, bCalls, cbCalls) =>
+        `Circuit Breaker fast-rejected ${rejections} calls while OPEN, reducing target downstream calls by ${saved} (${bCalls} → ${cbCalls}).`,
+      combinedSuppression: (suppressed, rRetries, rcRetries) =>
+        `Combining Retry + Circuit Breaker suppressed ${suppressed} futile retries while the breaker was OPEN (retries reduced from ${rRetries} to ${rcRetries}).`,
+      failFastSpeedup: (bFailP95, ffFailP95, bOverallP95, ffOverallP95) =>
+        `Fail-Fast reduced failed-request p95 latency from ${bFailP95}ms to ${ffFailP95}ms (overall p95: ${bOverallP95}ms → ${ffOverallP95}ms).`,
+      allHealthy: (count, reqs, successPct, p95) =>
+        `All ${count} strategies completed ${reqs} logical requests with ${successPct}% success rate and ${p95}ms p95 latency.`,
+    },
+    strategies: {
+      baseline: {
+        shortName: 'Baseline',
+        fullName: 'Baseline (No Resilience)',
+        description:
+          'Single attempt per hop with standard service timeout. Propagates all errors and latency spikes directly upstream.',
+      },
+      retry: {
+        shortName: 'Retry',
+        fullName: 'Retry (Exp. Backoff + Jitter)',
+        description:
+          'Retries transient downstream failures up to 3 times on Recommendation -> Feature DB. Highly effective for intermittent errors, but dangerous during sustained outages.',
+      },
+      circuit_breaker: {
+        shortName: 'Circuit Breaker',
+        fullName: 'Circuit Breaker (Trips OPEN)',
+        description:
+          'Trips OPEN after consecutive downstream errors. Fast-rejects calls in 0ms to protect callers from blocking, and probes downstream recovery in HALF-OPEN state.',
+      },
+      retry_circuit_breaker: {
+        shortName: 'Retry + CB',
+        fullName: 'Retry + Circuit Breaker Combined',
+        description:
+          'Combines retry recovery for transient glitches with breaker circuit-opening to immediately suppress futile retries when downstream is completely down.',
+      },
+      fail_fast: {
+        shortName: 'Fail-Fast',
+        fullName: 'Fail-Fast (Aggressive Timeout)',
+        description:
+          'Applies an aggressive downstream timeout (120ms) instead of standard (450ms). Frees worker threads immediately upon downstream slowness to preserve tail latency.',
+      },
+    },
+  },
+  topology: {
+    summaryView: 'Summary View',
+    timelineReplay: 'Timeline Replay',
+    statusHealthy: 'HEALTHY',
+    statusDegraded: 'DEGRADED',
+    statusCritical: 'CRITICAL',
+    statusDown: 'OUTAGE / DOWN',
+    clientLabel: 'Client',
+    clientRole: 'Ingress Traffic Generator',
+    legendTitle: 'Status & Resource Legend',
+    legendWorkers: 'Workers In Use',
+    legendQueue: 'Queue Saturation',
+    legendCircuit: 'Circuit Breaker',
+    faultActiveBadge: 'FAULT INJECTED',
+    playbackSecond: (sec, total) => `t = ${sec}s / ${total}s`,
+  },
+  playbackBar: {
+    summaryView: 'Summary View',
+    timelineReplay: 'Timeline Replay',
+    play: 'Play',
+    pause: 'Pause',
+    reset: 'Reset',
+    stepBack: 'Step Back (-1s)',
+    stepForward: 'Step Forward (+1s)',
+    speed: 'Speed',
+    faultWindow: (start, end) => `Fault Window: ${start}s–${end}s`,
+    faultActiveNow: 'Fault Active (Downstream Impacting)',
+  },
+  metricsCards: {
+    logicalSuccessRate: 'Logical Success Rate',
+    successCountRatio: (success, total) => `(${success} / ${total} req)`,
+    errorRateBreakdown: 'Error Rate & Breakdown',
+    timeouts: 'Timeouts',
+    queueOverflows: 'Queue Drops',
+    p95AvgLatency: 'p95 & Average Latency',
+    splitLatency: (succP95, failP95) => `Succ p95: ${succP95}ms | Fail p95: ${failP95}ms`,
+    downstreamCallsResilience: 'Downstream Calls & Resilience',
+    retriesExecuted: 'Retries Executed',
+    callAmp: 'Call Amplification',
+    cbFastRejections: 'CB Fast-Rejections',
+  },
+  charts: {
+    successErrorTitle: 'Success & Error Rate (%)',
+    successErrorSub: 'End-to-end client outcome per second',
+    latencyTitle: 'Latency Over Time (ms)',
+    latencySub: 'Client perceived p95 and average response time',
+    queueTitle: 'Queue Length Over Time',
+    queueSub: 'Upstream queuing caused by downstream bottlenecks',
+    successRateSeries: 'Success Rate (%)',
+    errorRateSeries: 'Error Rate (%)',
+    p95LatencySeries: 'p95 Latency (ms)',
+    avgLatencySeries: 'Avg Latency (ms)',
+    faultBadge: (start, end) => `Fault: ${start}s–${end}s`,
+  },
+  eventLog: {
+    serviceBreakdownTitle: 'Service-by-Service Breakdown',
+    serviceBreakdownSub:
+      'Primary calls, retry attempts, CB rejections, and worker/queue saturation',
+    colService: 'Service',
+    colCalls: 'Calls (+Retry)',
+    colCbReject: 'CB Reject',
+    colSuccessRate: 'Success',
+    colTimeouts: 'Timeout',
+    colP95: 'p95 (ms)',
+    colWorkerQueue: 'Worker / Queue',
+    eventStreamTitle: 'Discrete-Event Stream',
+    eventStreamSub:
+      'Virtual-time chronological event log emitted by the simulation engine',
+    filterAll: 'ALL EVENTS',
+    colSec: 'Sec',
+    colTime: 'Virtual Time',
+    colEvent: 'Event Type',
+    colRequest: 'Request',
+    colFromTo: 'Caller -> Callee',
+    colDetails: 'Details',
+    events: {
+      REQUEST_ARRIVAL: 'Arrival',
+      QUEUE_ENQUEUED: 'Enqueued',
+      PROCESSING_START: 'Proc Start',
+      DOWNSTREAM_CALL: 'Call',
+      RETRY_BACKOFF_COMPLETE: 'Retry Backoff',
+      PROCESSING_COMPLETE: 'Completed',
+      REQUEST_FAILURE: 'Failure',
+      REQUEST_TIMEOUT: 'Timeout',
+      CIRCUIT_STATE_CHANGE: 'CB State Change',
+    },
+  },
+};

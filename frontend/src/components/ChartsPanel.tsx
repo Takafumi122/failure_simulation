@@ -14,6 +14,7 @@ import {
   YAxis,
 } from 'recharts';
 import { FaultConfig, StrategyResult } from '../types/simulation';
+import { useI18n } from '../i18n/I18nContext';
 
 interface ChartsPanelProps {
   result: StrategyResult | null;
@@ -30,6 +31,7 @@ export const ChartsPanel: React.FC<ChartsPanelProps> = ({
   currentSecond,
   onSelectSecond,
 }) => {
+  const { t } = useI18n();
   const chartData = useMemo(() => {
     if (!result) return [];
     return result.timeSeries.map((pt) => ({
@@ -61,15 +63,15 @@ export const ChartsPanel: React.FC<ChartsPanelProps> = ({
         <div className="flex items-center justify-between mb-3">
           <div>
             <h3 className="text-xs font-bold uppercase tracking-wider text-slate-200">
-              Success & Error Rate (%)
+              {t.charts.successErrorTitle}
             </h3>
             <p className="text-[11px] text-slate-400">
-              End-to-end client outcome per second
+              {t.charts.successErrorSub}
             </p>
           </div>
           {hasFaultWindow && (
             <span className="text-[10px] rounded bg-rose-500/15 border border-rose-500/30 px-2 py-0.5 text-rose-300">
-              Fault: {fault.startSec}s–{fault.endSec}s
+              {t.charts.faultBadge(fault.startSec, fault.endSec)}
             </span>
           )}
         </div>
@@ -119,7 +121,7 @@ export const ChartsPanel: React.FC<ChartsPanelProps> = ({
               <Area
                 type="monotone"
                 dataKey="successRatePct"
-                name="Success %"
+                name={t.charts.successRateSeries}
                 stroke="#10b981"
                 fill="#10b981"
                 fillOpacity={0.2}
@@ -128,7 +130,7 @@ export const ChartsPanel: React.FC<ChartsPanelProps> = ({
               <Area
                 type="monotone"
                 dataKey="errorRatePct"
-                name="Error %"
+                name={t.charts.errorRateSeries}
                 stroke="#f43f5e"
                 fill="#f43f5e"
                 fillOpacity={0.25}
@@ -144,10 +146,10 @@ export const ChartsPanel: React.FC<ChartsPanelProps> = ({
         <div className="flex items-center justify-between mb-3">
           <div>
             <h3 className="text-xs font-bold uppercase tracking-wider text-slate-200">
-              p95 Latency Propagation (ms)
+              {t.charts.latencyTitle}
             </h3>
             <p className="text-[11px] text-slate-400">
-              How downstream delay amplifies upstream response times
+              {t.charts.latencySub}
             </p>
           </div>
         </div>
@@ -197,7 +199,7 @@ export const ChartsPanel: React.FC<ChartsPanelProps> = ({
               <Line
                 type="monotone"
                 dataKey="p95LatencyMs"
-                name="Client E2E p95"
+                name={t.charts.p95LatencySeries}
                 stroke="#818cf8"
                 strokeWidth={2.5}
                 dot={false}
@@ -228,10 +230,10 @@ export const ChartsPanel: React.FC<ChartsPanelProps> = ({
         <div className="flex items-center justify-between mb-3">
           <div>
             <h3 className="text-xs font-bold uppercase tracking-wider text-slate-200">
-              Service Queue Backpressure
+              {t.charts.queueTitle}
             </h3>
             <p className="text-[11px] text-slate-400">
-              Peak queued requests waiting for busy workers
+              {t.charts.queueSub}
             </p>
           </div>
         </div>

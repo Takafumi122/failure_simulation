@@ -9,6 +9,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { FaultConfig } from '../types/simulation';
+import { useI18n } from '../i18n/I18nContext';
 
 interface PlaybackBarProps {
   mode: 'summary' | 'playback';
@@ -35,6 +36,7 @@ export const PlaybackBar: React.FC<PlaybackBarProps> = ({
   setSpeed,
   fault,
 }) => {
+  const { t } = useI18n();
   const maxSec = Math.max(0, durationSec - 1);
   const isFaultNow =
     fault.type !== 'none' &&
@@ -71,7 +73,7 @@ export const PlaybackBar: React.FC<PlaybackBarProps> = ({
                 : 'text-slate-400 hover:text-slate-200'
             }`}
           >
-            Summary View
+            {t.playbackBar.summaryView}
           </button>
           <button
             type="button"
@@ -83,7 +85,7 @@ export const PlaybackBar: React.FC<PlaybackBarProps> = ({
             }`}
           >
             <Sparkles className="w-3 h-3" />
-            Timeline Replay
+            {t.playbackBar.timelineReplay}
           </button>
         </div>
 
@@ -95,18 +97,18 @@ export const PlaybackBar: React.FC<PlaybackBarProps> = ({
           >
             {isPlaying ? (
               <>
-                <Pause className="w-3.5 h-3.5" /> Pause
+                <Pause className="w-3.5 h-3.5" /> {t.playbackBar.pause}
               </>
             ) : (
               <>
-                <Play className="w-3.5 h-3.5" /> Replay Events
+                <Play className="w-3.5 h-3.5" /> {t.playbackBar.play}
               </>
             )}
           </button>
 
           <button
             type="button"
-            title="Step -1s"
+            title={t.playbackBar.stepBack}
             onClick={() => {
               setIsPlaying(false);
               setMode('playback');
@@ -119,7 +121,7 @@ export const PlaybackBar: React.FC<PlaybackBarProps> = ({
 
           <button
             type="button"
-            title="Step +1s"
+            title={t.playbackBar.stepForward}
             onClick={() => {
               setIsPlaying(false);
               setMode('playback');
@@ -132,7 +134,7 @@ export const PlaybackBar: React.FC<PlaybackBarProps> = ({
 
           <button
             type="button"
-            title="Reset to 0s"
+            title={t.playbackBar.reset}
             onClick={() => {
               setIsPlaying(false);
               setCurrentSecond(0);
@@ -147,7 +149,7 @@ export const PlaybackBar: React.FC<PlaybackBarProps> = ({
       {/* Scrubber Slider */}
       <div className="flex-1 w-full flex items-center gap-3">
         <span className="text-xs font-mono font-bold text-indigo-300 min-w-[68px]">
-          t = {currentSecond}s / {maxSec}s
+          {t.topology.playbackSecond(currentSecond, maxSec)}
         </span>
 
         <div className="relative flex-1 flex items-center">
@@ -167,7 +169,7 @@ export const PlaybackBar: React.FC<PlaybackBarProps> = ({
 
         {mode === 'playback' && isFaultNow && (
           <span className="hidden sm:inline-flex items-center rounded-md bg-rose-500/20 border border-rose-500/40 px-2 py-0.5 text-[11px] font-semibold text-rose-300">
-            Fault Window Active ({fault.startSec}s–{fault.endSec}s)
+            {t.playbackBar.faultWindow(fault.startSec, fault.endSec)}
           </span>
         )}
       </div>

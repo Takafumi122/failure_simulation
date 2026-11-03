@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { Filter, Terminal } from 'lucide-react';
 import { EventType, SimulationEventLog, StrategyResult } from '../types/simulation';
+import { useI18n } from '../i18n/I18nContext';
 
 interface EventLogViewProps {
   result: StrategyResult | null;
@@ -27,6 +28,7 @@ export const EventLogView: React.FC<EventLogViewProps> = ({
   mode,
   currentSecond,
 }) => {
+  const { t } = useI18n();
   const [filterType, setFilterType] = useState<string>('ALL');
 
   const filteredEvents = useMemo(() => {
@@ -55,10 +57,10 @@ export const EventLogView: React.FC<EventLogViewProps> = ({
         <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
           <div>
             <h3 className="text-xs font-bold uppercase tracking-wider text-slate-200">
-              Service-by-Service Breakdown
+              {t.eventLog.serviceBreakdownTitle}
             </h3>
             <p className="text-[11px] text-slate-400">
-              Primary calls, retry attempts, CB rejections, and worker/queue saturation
+              {t.eventLog.serviceBreakdownSub}
             </p>
           </div>
           <span className="text-[11px] font-mono text-indigo-300 bg-indigo-500/10 border border-indigo-500/30 rounded px-2 py-0.5">
@@ -70,13 +72,13 @@ export const EventLogView: React.FC<EventLogViewProps> = ({
           <table className="w-full text-left border-collapse text-xs">
             <thead>
               <tr className="border-b border-slate-800 text-[11px] text-slate-400">
-                <th className="py-2 pr-2">Service</th>
-                <th className="py-2 px-1.5 text-right">Calls (+Retry)</th>
-                <th className="py-2 px-1.5 text-right">CB Reject</th>
-                <th className="py-2 px-1.5 text-right">Success</th>
-                <th className="py-2 px-1.5 text-right">Timeout</th>
-                <th className="py-2 px-1.5 text-right">p95 (ms)</th>
-                <th className="py-2 pl-1.5 text-right">Worker / Queue</th>
+                <th className="py-2 pr-2">{t.eventLog.colService}</th>
+                <th className="py-2 px-1.5 text-right">{t.eventLog.colCalls}</th>
+                <th className="py-2 px-1.5 text-right">{t.eventLog.colCbReject}</th>
+                <th className="py-2 px-1.5 text-right">{t.eventLog.colSuccessRate}</th>
+                <th className="py-2 px-1.5 text-right">{t.eventLog.colTimeouts}</th>
+                <th className="py-2 px-1.5 text-right">{t.eventLog.colP95}</th>
+                <th className="py-2 pl-1.5 text-right">{t.eventLog.colWorkerQueue}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/70 font-mono">
@@ -130,7 +132,7 @@ export const EventLogView: React.FC<EventLogViewProps> = ({
             <Terminal className="w-4 h-4 text-indigo-400" />
             <div>
               <h3 className="text-xs font-bold uppercase tracking-wider text-slate-200">
-                Discrete Event Stream{' '}
+                {t.eventLog.eventStreamTitle}{' '}
                 {mode === 'playback' ? `(t = ${currentSecond}s)` : '(Sampled Log)'}
               </h3>
               <p className="text-[11px] text-slate-400">
@@ -149,7 +151,7 @@ export const EventLogView: React.FC<EventLogViewProps> = ({
               onChange={(e) => setFilterType(e.target.value)}
               className="rounded bg-slate-950 border border-slate-700 px-2 py-1 text-[11px] text-slate-200"
             >
-              <option value="ALL">All Event Types</option>
+              <option value="ALL">{t.eventLog.filterAll}</option>
               <option value="CIRCUIT_STATE_CHANGE">CIRCUIT_STATE_CHANGE</option>
               <option value="RETRY_BACKOFF_COMPLETE">RETRY_BACKOFF_COMPLETE</option>
               <option value="REQUEST_FAILURE">REQUEST_FAILURE</option>

@@ -72,4 +72,25 @@ test.describe('FailureLab Portfolio Release E2E', () => {
 
     expect(secondRunText).toEqual(firstRunText);
   });
+
+  test('4. Language switcher toggles UI between English and Japanese', async ({
+    page,
+  }) => {
+    await page.goto('/');
+
+    // Initially in English
+    await expect(page.getByTestId('lang-btn-en')).toBeVisible();
+    await expect(page.getByTestId('lang-btn-ja')).toBeVisible();
+
+    // Switch to Japanese
+    await page.getByTestId('lang-btn-ja').click();
+    await expect(page.getByTestId('scenario-gallery')).toBeVisible();
+    await expect(page.locator('body')).toContainText('対話型シナリオギャラリー');
+    await expect(page.locator('body')).toContainText('5つの耐障害性戦略の並行比較');
+
+    // Switch back to English
+    await page.getByTestId('lang-btn-en').click();
+    await expect(page.locator('body')).toContainText('Interactive Scenario Gallery');
+    await expect(page.locator('body')).toContainText('5 Resilience Strategies Side-by-Side Comparison');
+  });
 });

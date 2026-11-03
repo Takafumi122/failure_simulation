@@ -22,6 +22,7 @@ import {
   ServiceConfig,
   SimulationRequest,
 } from '../types/simulation';
+import { useI18n } from '../i18n/I18nContext';
 
 interface ControlPanelProps {
   scenarios: ScenarioPreset[];
@@ -126,6 +127,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
   onImportConfig,
   isLoading,
 }) => {
+  const { t } = useI18n();
   const [showResilienceControls, setShowResilienceControls] = useState(true);
   const [showAdvancedServices, setShowAdvancedServices] = useState(false);
   const [importError, setImportError] = useState<string | null>(null);
@@ -223,6 +225,13 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
     reader.readAsText(file);
   };
 
+  const scenarioDesc = currentScenario
+    ? t.scenarioGallery.scenarios[currentScenario.id]?.description || currentScenario.description
+    : null;
+  const scenarioCategory = currentScenario
+    ? t.scenarioGallery.scenarios[currentScenario.id]?.category || currentScenario.category
+    : t.controlPanel.customParams;
+
   return (
     <div className="rounded-xl bg-slate-900/90 border border-slate-800 p-4 space-y-4">
       {/* 1. Scenario Selector */}
@@ -230,10 +239,10 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
         <div className="flex items-center justify-between mb-2">
           <label className="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
             <Sliders className="w-3.5 h-3.5 text-indigo-400" />
-            Scenario Presets
+            {t.controlPanel.selectPreset}
           </label>
           <span className="text-[10px] text-indigo-400 font-medium">
-            {currentScenario?.category || 'Custom Parameters'}
+            {scenarioCategory}
           </span>
         </div>
 
@@ -246,16 +255,19 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
           }}
           className="w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2 text-xs font-medium text-slate-100 focus:outline-none focus:border-indigo-500"
         >
-          {scenarios.map((s) => (
-            <option key={s.id} value={s.id}>
-              {s.name}
-            </option>
-          ))}
+          {scenarios.map((s) => {
+            const optTitle = t.scenarioGallery.scenarios[s.id]?.shortTitle || s.name;
+            return (
+              <option key={s.id} value={s.id}>
+                {optTitle}
+              </option>
+            );
+          })}
         </select>
 
-        {currentScenario && (
+        {scenarioDesc && (
           <p className="mt-2 text-xs text-slate-400 leading-relaxed bg-slate-950/60 rounded-lg p-2.5 border border-slate-800/80">
-            {currentScenario.description}
+            {scenarioDesc}
           </p>
         )}
       </div>
@@ -263,12 +275,12 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
       {/* 2. Traffic & Global Settings */}
       <div className="border-t border-slate-800 pt-3.5">
         <div className="text-xs font-bold uppercase tracking-wider text-slate-300 mb-2.5">
-          Traffic & Deterministic Seed
+          {t.controlPanel.workloadHeader}
         </div>
         <div className="grid grid-cols-3 gap-2">
           <div>
             <label className="block text-[10px] text-slate-400 mb-1">
-              RPS (Req/sec)
+              {t.controlPanel.rps}
             </label>
             <input
               data-testid="input-rps"
@@ -288,7 +300,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
 
           <div>
             <label className="block text-[10px] text-slate-400 mb-1">
-              Duration (sec)
+              {t.controlPanel.durationSec}
             </label>
             <input
               data-testid="input-duration"
@@ -308,7 +320,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
 
           <div>
             <label className="block text-[10px] text-slate-400 mb-1">
-              Random Seed
+              {t.controlPanel.seed}
             </label>
             <input
               data-testid="input-seed"
@@ -330,14 +342,14 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
       <div className="border-t border-slate-800 pt-3.5">
         <div className="text-xs font-bold uppercase tracking-wider text-rose-300 flex items-center gap-1.5 mb-2.5">
           <Flame className="w-3.5 h-3.5 text-rose-400" />
-          Fault Injection Settings
+          {t.controlPanel.faultHeader}
         </div>
 
         <div className="space-y-2.5">
           <div className="grid grid-cols-2 gap-2">
             <div>
               <label className="block text-[10px] text-slate-400 mb-1">
-                Target Service
+                {t.controlPanel.targetService}
               </label>
               <select
                 value={config.fault.targetService}
@@ -354,7 +366,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
 
             <div>
               <label className="block text-[10px] text-slate-400 mb-1">
-                Fault Type
+                {t.controlPanel.faultType}
               </label>
               <select
                 value={config.fault.type}
@@ -376,10 +388,10 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
                 }}
                 className="w-full rounded-lg bg-slate-950 border border-slate-700 px-2 py-1.5 text-xs text-slate-100"
               >
-                <option value="latency">Latency Spike (遅延)</option>
-                <option value="outage">Total Outage (100% 停止)</option>
-                <option value="error_rate">Probabilistic Error (確率的失敗)</option>
-                <option value="none">None (障害なし)</option>
+                <option value="latency">{t.controlPanel.faultTypeLatency}</option>
+                <option value="outage">{t.controlPanel.faultTypeOutage}</option>
+                <option value="error_rate">{t.controlPanel.faultTypeErrorRate}</option>
+                <option value="none">{t.controlPanel.faultTypeNone}</option>
               </select>
             </div>
           </div>
@@ -389,7 +401,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
               <div className="grid grid-cols-2 gap-2">
                 <div>
                   <label className="block text-[10px] text-slate-400 mb-1">
-                    Fault Start (sec)
+                    {t.controlPanel.startSec}
                   </label>
                   <input
                     type="number"
@@ -404,7 +416,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
                 </div>
                 <div>
                   <label className="block text-[10px] text-slate-400 mb-1">
-                    Fault End (sec)
+                    {t.controlPanel.endSec}
                   </label>
                   <input
                     type="number"
@@ -422,7 +434,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
               {config.fault.type === 'latency' && (
                 <div>
                   <label className="block text-[10px] text-amber-300 mb-1">
-                    Injected Extra Latency (ms)
+                    {t.controlPanel.addedLatencyMs}
                   </label>
                   <input
                     type="number"
@@ -441,7 +453,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
               {config.fault.type === 'error_rate' && (
                 <div>
                   <label className="block text-[10px] text-rose-300 mb-1">
-                    Injected Failure Probability (0.05 – 1.0)
+                    {t.controlPanel.errorRatePct}
                   </label>
                   <input
                     type="number"
@@ -472,7 +484,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
         >
           <span className="flex items-center gap-1.5">
             <ShieldAlert className="w-3.5 h-3.5 text-sky-400" />
-            Retry, Circuit Breaker & Fail-Fast
+            {t.controlPanel.resilienceHeader}
           </span>
           {showResilienceControls ? (
             <ChevronUp className="w-4 h-4 text-slate-400" />
@@ -484,18 +496,14 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
         {showResilienceControls && (
           <div className="mt-2.5 space-y-3">
             <div className="text-[10px] text-slate-400 bg-slate-950/70 border border-slate-800 rounded px-2.5 py-1.5 font-mono">
-              Target Call Edge:{' '}
-              <span className="text-indigo-300 font-semibold">
-                {SERVICE_LABELS[resCfg.targetCaller] || resCfg.targetCaller} →{' '}
-                {SERVICE_LABELS[resCfg.targetCallee] || resCfg.targetCallee}
-              </span>
+              {t.controlPanel.targetEdgeLabel}
             </div>
 
             {/* Retry Policy Box */}
             <div className="rounded-lg bg-slate-950/90 border border-slate-800 p-2.5 space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-[11px] font-bold text-sky-300 flex items-center gap-1">
-                  <Repeat className="w-3 h-3" /> Retry (Exp Backoff + Jitter)
+                  <Repeat className="w-3 h-3" /> {t.controlPanel.retryGroup}
                 </span>
                 <label className="flex items-center gap-1 text-[10px] text-slate-300 cursor-pointer">
                   <input
@@ -504,7 +512,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
                     onChange={(e) => updateRetry({ jitter: e.target.checked })}
                     className="accent-indigo-500"
                   />
-                  Jitter
+                  {t.controlPanel.jitterLabel}
                 </label>
               </div>
               <p className="text-[10px] text-slate-400 leading-snug">
@@ -513,7 +521,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
               <div className="grid grid-cols-3 gap-2">
                 <div>
                   <label className="block text-[10px] text-slate-400">
-                    Max Retries
+                    {t.controlPanel.maxRetries}
                   </label>
                   <input
                     type="number"
@@ -528,7 +536,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
                 </div>
                 <div>
                   <label className="block text-[10px] text-slate-400">
-                    Base Backoff (ms)
+                    {t.controlPanel.initialBackoffMs}
                   </label>
                   <input
                     type="number"
@@ -545,7 +553,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
                 </div>
                 <div>
                   <label className="block text-[10px] text-slate-400">
-                    Max Backoff (ms)
+                    {t.controlPanel.maxBackoffMs}
                   </label>
                   <input
                     type="number"
@@ -566,15 +574,12 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
             {/* Circuit Breaker Box */}
             <div className="rounded-lg bg-slate-950/90 border border-slate-800 p-2.5 space-y-2">
               <div className="text-[11px] font-bold text-violet-300 flex items-center gap-1">
-                <ShieldAlert className="w-3 h-3" /> Circuit Breaker (Closed/Open/Half-Open)
+                <ShieldAlert className="w-3 h-3" /> {t.controlPanel.cbGroup}
               </div>
-              <p className="text-[10px] text-slate-400 leading-snug">
-                Trips OPEN after N consecutive failures to fast-reject calls and protect downstream workers. Probes in HALF_OPEN after cooldown.
-              </p>
               <div className="grid grid-cols-2 gap-2">
                 <div>
                   <label className="block text-[10px] text-slate-400">
-                    Failure Threshold
+                    {t.controlPanel.cbFailureThreshold}
                   </label>
                   <input
                     type="number"
@@ -591,7 +596,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
                 </div>
                 <div>
                   <label className="block text-[10px] text-slate-400">
-                    Open Cooldown (ms)
+                    {t.controlPanel.cbOpenTimeoutMs}
                   </label>
                   <input
                     type="number"
@@ -609,7 +614,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
                 </div>
                 <div>
                   <label className="block text-[10px] text-slate-400">
-                    Half-Open Max Calls
+                    {t.controlPanel.cbHalfOpenMaxCalls}
                   </label>
                   <input
                     type="number"
@@ -626,7 +631,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
                 </div>
                 <div>
                   <label className="block text-[10px] text-slate-400">
-                    Successes to Close
+                    {t.controlPanel.cbHalfOpenSuccessThreshold}
                   </label>
                   <input
                     type="number"
@@ -648,7 +653,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
             <div className="rounded-lg bg-slate-950/90 border border-slate-800 p-2.5 space-y-1.5">
               <div className="flex items-center justify-between gap-2">
                 <div className="text-[11px] font-bold text-amber-300 flex items-center gap-1">
-                  <Zap className="w-3 h-3" /> Fail-Fast Attempt Timeout (ms)
+                  <Zap className="w-3 h-3" /> {t.controlPanel.failFastTimeoutMs}
                 </div>
                 <input
                   type="number"
@@ -662,9 +667,6 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
                   className="w-24 rounded bg-slate-900 border border-amber-500/40 px-2 py-1 text-xs font-mono text-right text-amber-200"
                 />
               </div>
-              <p className="text-[10px] text-slate-400 leading-snug">
-                Enforces a shorter per-attempt deadline so slow downstream calls abort early before exhausting upstream worker pools.
-              </p>
             </div>
           </div>
         )}
@@ -679,7 +681,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
         >
           <span className="flex items-center gap-1.5">
             <Settings2 className="w-3.5 h-3.5 text-slate-400" />
-            Per-Service Capacity & Timeouts
+            {t.controlPanel.serviceLimitsHeader}
           </span>
           {showAdvancedServices ? (
             <ChevronUp className="w-4 h-4 text-slate-400" />
@@ -779,7 +781,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
             className="flex items-center justify-center gap-1.5 rounded-lg bg-slate-950 hover:bg-slate-800 border border-slate-700 py-1.5 px-2.5 text-xs font-medium text-slate-200 transition cursor-pointer"
           >
             <Download className="w-3.5 h-3.5 text-indigo-400" />
-            Export JSON
+            {t.controlPanel.exportJson}
           </button>
 
           <button
@@ -789,7 +791,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
             className="flex items-center justify-center gap-1.5 rounded-lg bg-slate-950 hover:bg-slate-800 border border-slate-700 py-1.5 px-2.5 text-xs font-medium text-slate-200 transition cursor-pointer"
           >
             <Upload className="w-3.5 h-3.5 text-emerald-400" />
-            Import JSON
+            {t.controlPanel.importJson}
           </button>
           <input
             ref={fileInputRef}
@@ -821,12 +823,12 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
         {isLoading ? (
           <>
             <RefreshCw className="w-4 h-4 animate-spin" />
-            Comparing 5 Strategies...
+            {t.controlPanel.simulating}
           </>
         ) : (
           <>
             <Play className="w-4 h-4 fill-current" />
-            Run & Compare All 5 Strategies
+            {t.controlPanel.runSimulation}
           </>
         )}
       </button>

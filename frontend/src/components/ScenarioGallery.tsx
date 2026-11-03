@@ -9,6 +9,7 @@ import {
   Zap,
 } from 'lucide-react';
 import { ScenarioPreset } from '../types/simulation';
+import { useI18n } from '../i18n/I18nContext';
 
 interface ScenarioGalleryProps {
   scenarios: ScenarioPreset[];
@@ -40,6 +41,8 @@ export const ScenarioGallery: React.FC<ScenarioGalleryProps> = ({
   onSelectScenario,
   isLoading,
 }) => {
+  const { t } = useI18n();
+
   return (
     <div className="rounded-xl bg-slate-900/90 border border-slate-800 p-4 mb-5">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 mb-3">
@@ -47,11 +50,11 @@ export const ScenarioGallery: React.FC<ScenarioGalleryProps> = ({
           <div className="flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-indigo-400" />
             <h2 className="text-xs font-bold uppercase tracking-wider text-slate-200">
-              Interactive Scenario Gallery — Click a Preset to Load & Compare 5 Strategies
+              {t.scenarioGallery.header}
             </h2>
           </div>
           <p className="text-xs text-slate-400 mt-0.5">
-            FailureLab simulates a 5-tier microservice chain in virtual time. Select any scenario below to observe how faults propagate upstream and how Retry, Circuit Breaker, and Fail-Fast behave under identical traffic and random seeds.
+            {t.scenarioGallery.description}
           </p>
         </div>
       </div>
@@ -62,7 +65,11 @@ export const ScenarioGallery: React.FC<ScenarioGalleryProps> = ({
       >
         {scenarios.map((sc) => {
           const isSelected = sc.id === selectedScenarioId;
-          const title = sc.shortTitle || sc.name;
+          const loc = t.scenarioGallery.scenarios[sc.id];
+          const title = loc?.shortTitle || sc.shortTitle || sc.name;
+          const desc = loc?.description || sc.description;
+          const highlight = loc?.highlight || sc.highlight;
+
           return (
             <button
               key={sc.id}
@@ -84,17 +91,17 @@ export const ScenarioGallery: React.FC<ScenarioGalleryProps> = ({
                   </span>
                   {isSelected && (
                     <span className="rounded bg-indigo-500/30 border border-indigo-400/50 px-1.5 py-0.5 text-[9px] font-bold uppercase text-indigo-200">
-                      Loaded
+                      {t.scenarioGallery.activeBadge}
                     </span>
                   )}
                 </div>
                 <p className="text-[11px] text-slate-400 line-clamp-2 leading-snug">
-                  {sc.description}
+                  {desc}
                 </p>
               </div>
 
               <div className="mt-2.5 pt-2 border-t border-slate-800/80 flex items-center justify-between text-[10px] font-mono">
-                <span className="text-indigo-300 truncate">{sc.highlight}</span>
+                <span className="text-indigo-300 truncate">{highlight}</span>
               </div>
             </button>
           );

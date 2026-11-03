@@ -14,6 +14,7 @@ import {
   Zap,
 } from 'lucide-react';
 import { CircuitState, ServiceStatus } from '../types/simulation';
+import { useI18n } from '../i18n/I18nContext';
 
 export interface ServiceNodeData extends Record<string, unknown> {
   id: string;
@@ -91,8 +92,17 @@ function getNodeIcon(id: string) {
 }
 
 export const ServiceNode: React.FC<NodeProps> = ({ data }) => {
+  const { t } = useI18n();
   const d = data as unknown as ServiceNodeData;
   const st = statusStyles[d.status] || statusStyles.healthy;
+  const statusLabel =
+    d.status === 'healthy'
+      ? t.topology.statusHealthy
+      : d.status === 'degraded'
+        ? t.topology.statusDegraded
+        : d.status === 'critical'
+          ? t.topology.statusCritical
+          : t.topology.statusDown;
 
   const queueRatio =
     d.queueLimit > 0
@@ -119,7 +129,7 @@ export const ServiceNode: React.FC<NodeProps> = ({ data }) => {
       {d.faultActiveNow && (
         <div className="-mt-1 mb-1.5 flex items-center justify-center gap-1 rounded-md bg-rose-500/25 border border-rose-500/50 px-2 py-0.5 text-[10px] font-semibold tracking-wider text-rose-200 animate-pulse">
           <Zap className="w-3 h-3 text-rose-400" />
-          FAULT ({d.faultType?.toUpperCase()})
+          {t.topology.faultActiveBadge} ({d.faultType?.toUpperCase()})
         </div>
       )}
 
@@ -145,10 +155,10 @@ export const ServiceNode: React.FC<NodeProps> = ({ data }) => {
           </div>
           <div>
             <div className="text-xs font-bold text-slate-100 leading-tight">
-              {d.label}
+              {d.isClient ? t.topology.clientLabel : d.label}
             </div>
             <div className="text-[10px] text-slate-400 leading-tight mt-0.5">
-              {d.role}
+              {d.isClient ? t.topology.clientRole : d.role}
             </div>
           </div>
         </div>
@@ -164,7 +174,7 @@ export const ServiceNode: React.FC<NodeProps> = ({ data }) => {
             <AlertTriangle className="w-3 h-3" />
           )}
           {d.status === 'down' && <XCircle className="w-3 h-3" />}
-          {st.label}
+          {statusLabel}
         </span>
         <span className="text-[10px] font-mono text-slate-300">
           {d.callCount} {d.mode === 'playback' ? 'req/s' : 'calls'}

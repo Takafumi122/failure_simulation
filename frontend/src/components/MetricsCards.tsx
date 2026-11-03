@@ -9,6 +9,7 @@ import {
   ShieldAlert,
 } from 'lucide-react';
 import { StrategyResult } from '../types/simulation';
+import { useI18n } from '../i18n/I18nContext';
 
 interface MetricsCardsProps {
   result: StrategyResult | null;
@@ -21,6 +22,7 @@ export const MetricsCards: React.FC<MetricsCardsProps> = ({
   mode,
   currentSecond,
 }) => {
+  const { t } = useI18n();
   if (!result) return null;
 
   const ov = result.metrics.overall;
@@ -49,7 +51,7 @@ export const MetricsCards: React.FC<MetricsCardsProps> = ({
       <div className="rounded-xl bg-slate-900/90 border border-slate-800 p-4 flex flex-col justify-between">
         <div className="flex items-center justify-between">
           <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-            Logical Success Rate {mode === 'playback' && `(t=${currentSecond}s)`}
+            {t.metricsCards.logicalSuccessRate} {mode === 'playback' && `(t=${currentSecond}s)`}
           </span>
           <CheckCircle2
             className={`w-4 h-4 ${
@@ -74,7 +76,7 @@ export const MetricsCards: React.FC<MetricsCardsProps> = ({
             {(successRate * 100).toFixed(1)}%
           </span>
           <span className="text-xs text-slate-400 font-mono">
-            ({successCount.toLocaleString()} / {totalRequests.toLocaleString()} req)
+            {t.metricsCards.successCountRatio(successCount.toLocaleString(), totalRequests.toLocaleString())}
           </span>
         </div>
         <div className="mt-2 w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
@@ -95,7 +97,7 @@ export const MetricsCards: React.FC<MetricsCardsProps> = ({
       <div className="rounded-xl bg-slate-900/90 border border-slate-800 p-4 flex flex-col justify-between">
         <div className="flex items-center justify-between">
           <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-            Error Rate & Breakdown
+            {t.metricsCards.errorRateBreakdown}
           </span>
           <AlertOctagon
             className={`w-4 h-4 ${
@@ -116,15 +118,15 @@ export const MetricsCards: React.FC<MetricsCardsProps> = ({
             {(errorRate * 100).toFixed(1)}%
           </span>
           <span className="text-xs text-slate-400 font-mono">
-            ({failureCount.toLocaleString()} failed)
+            ({failureCount.toLocaleString()} fail)
           </span>
         </div>
         <div className="mt-2 flex items-center gap-3 text-[11px] font-mono text-slate-400">
           <span className="text-amber-300/90">
-            Timeouts: <strong>{timeoutCount}</strong>
+            {t.metricsCards.timeouts}: <strong>{timeoutCount}</strong>
           </span>
           <span className="text-rose-300/90">
-            Queue Drops: <strong>{queueOverflowCount}</strong>
+            {t.metricsCards.queueOverflows}: <strong>{queueOverflowCount}</strong>
           </span>
         </div>
       </div>
@@ -133,7 +135,7 @@ export const MetricsCards: React.FC<MetricsCardsProps> = ({
       <div className="rounded-xl bg-slate-900/90 border border-slate-800 p-4 flex flex-col justify-between">
         <div className="flex items-center justify-between">
           <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-            p95 End-to-End Latency
+            {t.metricsCards.p95AvgLatency}
           </span>
           <Clock className="w-4 h-4 text-indigo-400" />
         </div>
@@ -163,7 +165,7 @@ export const MetricsCards: React.FC<MetricsCardsProps> = ({
       <div className="rounded-xl bg-slate-900/90 border border-slate-800 p-4 flex flex-col justify-between">
         <div className="flex items-center justify-between">
           <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-            Retries & CB Shedding
+            {t.metricsCards.downstreamCallsResilience}
           </span>
           <Repeat className="w-4 h-4 text-sky-400" />
         </div>
@@ -172,17 +174,17 @@ export const MetricsCards: React.FC<MetricsCardsProps> = ({
             {retryCount.toLocaleString()}
           </span>
           <span className="text-xs text-slate-400 font-mono">
-            retries (Amp: <strong>{ov.retryAmplificationFactor.toFixed(2)}x</strong>)
+            {t.strategyComparison.retriesLabel} ({t.metricsCards.callAmp}: <strong>{ov.retryAmplificationFactor.toFixed(2)}x</strong>)
           </span>
         </div>
         <div className="mt-2 flex items-center justify-between text-[11px] font-mono text-slate-400">
           <span className="flex items-center gap-1 text-violet-300">
             <ShieldAlert className="w-3 h-3" />
-            CB Blocked: <strong>{cbRejects.toLocaleString()}</strong>
+            {t.metricsCards.cbFastRejections}: <strong>{cbRejects.toLocaleString()}</strong>
           </span>
           <span className="flex items-center gap-1">
             <Layers className="w-3 h-3 text-slate-500" />
-            {ov.totalDownstreamCalls.toLocaleString()} total calls
+            {ov.totalDownstreamCalls.toLocaleString()} calls
           </span>
         </div>
       </div>

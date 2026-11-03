@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Activity, AlertCircle, Cpu, GitBranch, Hash } from 'lucide-react';
+import { Activity, AlertCircle, Cpu, GitBranch, Globe, Hash } from 'lucide-react';
+import { useI18n } from './i18n/I18nContext';
 import { fetchScenarios, runSimulationCompare } from './api/client';
 import {
   CompareResponse,
@@ -25,6 +26,7 @@ const ALL_STRATEGIES = [
 ];
 
 export const App: React.FC = () => {
+  const { t, locale, setLocale } = useI18n();
   const [topology, setTopology] = useState<Topology | null>(null);
   const [scenarios, setScenarios] = useState<ScenarioPreset[]>([]);
   const [selectedScenarioId, setSelectedScenarioId] = useState<string>('');
@@ -149,25 +151,57 @@ export const App: React.FC = () => {
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-base font-extrabold tracking-tight text-white">
-                  FailureLab
+                  {t.nav.title}
                 </h1>
                 <span
                   data-testid="engine-version-badge"
                   className="rounded-md bg-indigo-500/20 border border-indigo-500/30 px-2 py-0.5 text-[10px] font-mono font-bold text-indigo-300"
                 >
-                  Engine {engineVer}
+                  {t.nav.engineBadge} {engineVer}
                 </span>
               </div>
               <p className="text-xs text-slate-400">
-                Distributed Systems Cascading Failure & Resilience Strategy Simulator (Retry / Circuit Breaker / Fail-Fast)
+                {t.nav.subtitle}
               </p>
             </div>
           </div>
 
           <div className="flex flex-wrap items-center gap-2 text-xs text-slate-400">
+            {/* Language Switcher */}
+            <div
+              className="inline-flex items-center rounded-lg bg-slate-900 border border-slate-700/80 p-0.5"
+              data-testid="language-switcher"
+            >
+              <Globe className="w-3.5 h-3.5 text-indigo-400 ml-1.5 mr-1" />
+              <button
+                type="button"
+                data-testid="lang-btn-en"
+                onClick={() => setLocale('en')}
+                className={`px-2 py-0.5 rounded text-[11px] font-bold transition cursor-pointer ${
+                  locale === 'en'
+                    ? 'bg-indigo-600 text-white shadow'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                EN
+              </button>
+              <button
+                type="button"
+                data-testid="lang-btn-ja"
+                onClick={() => setLocale('ja')}
+                className={`px-2 py-0.5 rounded text-[11px] font-bold transition cursor-pointer ${
+                  locale === 'ja'
+                    ? 'bg-indigo-600 text-white shadow'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                日本語
+              </button>
+            </div>
+
             <span className="hidden md:inline-flex items-center gap-1.5 rounded-lg bg-slate-900 border border-slate-800 px-2.5 py-1">
               <Cpu className="w-3.5 h-3.5 text-emerald-400" />
-              Go <code className="text-slate-200 font-mono">container/heap</code> + Coordinate RNG
+              {t.nav.engineTech}
             </span>
             {compareResp && (
               <span
@@ -180,7 +214,7 @@ export const App: React.FC = () => {
             )}
             <span className="hidden sm:inline-flex items-center gap-1.5 rounded-lg bg-slate-900 border border-slate-800 px-2.5 py-1">
               <GitBranch className="w-3.5 h-3.5 text-indigo-400" />
-              <strong className="text-indigo-300">5 Strategies</strong>
+              <strong className="text-indigo-300">{t.nav.strategiesCount}</strong>
             </span>
           </div>
         </div>
@@ -195,7 +229,7 @@ export const App: React.FC = () => {
           >
             <AlertCircle className="w-5 h-5 text-rose-400 shrink-0" />
             <div>
-              <span className="font-bold">Simulation Error: </span>
+              <span className="font-bold">{t.nav.errorPrefix}</span>
               {errorMsg}
             </div>
           </div>
@@ -284,7 +318,7 @@ export const App: React.FC = () => {
           </>
         ) : (
           <div className="h-96 flex items-center justify-center text-sm text-slate-400">
-            Loading FailureLab topology and scenarios...
+            {t.nav.loadingApp}
           </div>
         )}
       </main>

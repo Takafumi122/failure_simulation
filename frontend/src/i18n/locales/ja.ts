@@ -1,0 +1,273 @@
+import { Translations } from '../types';
+
+export const ja: Translations = {
+  nav: {
+    title: 'FailureLab',
+    subtitle:
+      '分散システムの障害連鎖・耐障害性戦略シミュレーター (Retry / Circuit Breaker / Fail-Fast)',
+    engineBadge: 'Engine',
+    engineTech: 'Go container/heap + Coordinate RNG',
+    strategiesCount: '5つの戦略',
+    langSwitch: '言語',
+    langEn: 'EN',
+    langJa: '日本語',
+    errorPrefix: 'シミュレーションエラー: ',
+    loadingApp: 'FailureLabのトポロジーとシナリオを読み込み中...',
+  },
+  scenarioGallery: {
+    header:
+      '対話型シナリオギャラリー — プリセットを選択して5つの耐障害性戦略を比較',
+    description:
+      '仮想時間上で5層のマイクロサービス連鎖をシミュレートします。シナリオを選択すると、障害が上流へ連鎖する様子と、同一トラフィック・乱数シード下での各戦略（Retry / Circuit Breaker / Fail-Fast）の挙動の違いを比較できます。',
+    activeBadge: '選択中',
+    scenarios: {
+      'transient-failure': {
+        shortTitle: '一時的障害',
+        category: 'Retryが有効',
+        description:
+          'Feature DBで35%の確率的エラーが発生（遅延急増なし）。Baselineでは論理成功率が約82.5%に低下しますが、Retry（指数バックオフ＋ジッター）により約98.9%まで大幅に回復します。',
+        highlight: '一時的エラーをリトライで救済（成功率+16%）',
+      },
+      'prolonged-outage': {
+        shortTitle: '長時間の完全停止',
+        category: '無駄なRetry vs CB遮断',
+        description:
+          'Feature DBが100%ダウン。単純なリトライは成功率を一切改善できず呼び出し数を3倍近く浪費しますが、Circuit BreakerがOPENになり下流への無駄な負荷を即座に遮断します。',
+        highlight: 'リトライの無駄打ちをCBが遮断',
+      },
+      'retry-storm': {
+        shortTitle: 'リトライストーム',
+        category: 'キュー飽和とFail-Fast',
+        description:
+          'Feature DBの処理時間が+220msに急増。リトライが殺到してキューを飽和させ上流ワーカーを枯渇させます。Fail-FastやCBは無駄な待機を防ぎp95を低く抑えます。',
+        highlight: 'リトライ急増によるキュー・タイムアウト連鎖',
+      },
+      'circuit-breaker-recovery': {
+        shortTitle: 'CBの自律復旧',
+        category: '状態遷移',
+        description:
+          'Feature DBが8秒間停止した後に復旧。Circuit BreakerがCLOSED → エラー検知でOPEN → クールダウン後にHALF-OPENで試験通電 → 成功によりCLOSEDへと自律的に状態遷移して自動復帰します。',
+        highlight: 'CLOSED → OPEN → HALF-OPEN → CLOSED',
+      },
+      'healthy-system': {
+        shortTitle: '正常稼働（ベースライン）',
+        category: 'ベースライン検証',
+        description:
+          '全サービスが障害なく正常稼働。平常時における各耐障害性戦略のオーバーヘッドが最小であり、誤検知による拒否が一切発生しないことを確認します。',
+        highlight: '成功率100%・誤検知ゼロ',
+      },
+    },
+  },
+  controlPanel: {
+    title: 'シミュレーションパラメータ',
+    customParams: 'カスタム設定',
+    selectPreset: 'シナリオプリセット',
+    workloadHeader: 'トラフィック負荷パラメータ',
+    durationSec: 'シミュレーション時間 (秒)',
+    durationSecHint: '1 〜 300 秒',
+    rps: 'トラフィックレート (RPS)',
+    rpsHint: '1 〜 500 リクエスト/秒',
+    seed: '乱数シード',
+    seedHint: '決定論的再現性のためのシード値',
+    faultHeader: '障害注入設定',
+    targetService: '障害対象サービス',
+    faultType: '障害タイプ',
+    faultTypeNone: 'なし (正常稼働)',
+    faultTypeOutage: '完全停止 (100% 失敗)',
+    faultTypeLatency: '遅延急増 (高レイテンシ)',
+    faultTypeErrorRate: '確率的エラー (部分障害)',
+    faultWindow: '障害発生時間帯 (開始 〜 終了)',
+    startSec: '開始秒',
+    endSec: '終了秒',
+    addedLatencyMs: '付加レイテンシ (ms)',
+    errorRatePct: 'エラー率 (%)',
+    resilienceHeader: '耐障害性ポリシー設定',
+    targetEdgeLabel: '適用境界: Recommendation → Feature DB',
+    retryGroup: 'リトライ（指数バックオフ ＋ ジッター）',
+    maxRetries: '最大リトライ回数',
+    initialBackoffMs: '初期バックオフ (ms)',
+    maxBackoffMs: '最大バックオフ (ms)',
+    backoffMultiplier: 'バックオフ倍率',
+    jitterLabel: 'Full Jitter（ランダム化）',
+    cbGroup: 'サーキットブレーカー',
+    cbFailureThreshold: '連続失敗トリップ閾値',
+    cbOpenTimeoutMs: 'Open維持・クールダウン時間 (ms)',
+    cbHalfOpenMaxCalls: 'Half-Open試行リクエスト数',
+    cbHalfOpenSuccessThreshold: 'Half-Open復旧判定成功数',
+    failFastGroup: 'Fail-Fastポリシー',
+    failFastTimeoutMs: 'タイムアウト時間 (ms)',
+    serviceLimitsHeader: 'サービス別リソース上限 (ワーカー数・キュー)',
+    serviceLimitWorker: 'ワーカー',
+    serviceLimitQueue: 'キュー',
+    serviceLimitTimeout: 'タイムアウト',
+    exportJson: 'JSONエクスポート',
+    importJson: 'JSONインポート',
+    runSimulation: 'シミュレーション実行',
+    simulating: 'シミュレーション実行中...',
+  },
+  strategyComparison: {
+    header: '5つの耐障害性戦略の並行比較',
+    subtitle:
+      '5つの戦略すべてが、完全に同一の障害条件・トラフィック到着スケジュール・乱数シードの下で実行されます。',
+    activeView: '選択中',
+    truncatedWarning:
+      'イベント数または仮想時刻の安全上限に達したため、結果が途中で打ち切られました。',
+    colStrategy: '戦略',
+    colLogicalSuccess: '論理成功率',
+    colP95Latency: '全体p95',
+    colP95Split: '成功/失敗別 p95',
+    colDownstreamCalls: '境界呼び出し数',
+    colCbRejections: 'CB高速拒否',
+    colPeakQueue: '最大キュー / 破棄',
+    retriesLabel: '回リトライ',
+    amplificationLabel: '倍増幅',
+    observedFactsHeader: '実測値に基づく客観的分析とトレードオフ',
+    observedFactsSubtext:
+      'シミュレーション結果から決定論的に算出（架空データやLLM推測値ではありません）:',
+    cbTimelineHeader: 'Circuit Breaker 状態遷移タイムライン',
+    cbTimelineSubtext:
+      '対象境界（Recommendation → Feature DB）での時系列遷移履歴:',
+    cbStateClosed: 'CLOSED (正常通電)',
+    cbStateOpen: 'OPEN (高速遮断)',
+    cbStateHalfOpen: 'HALF-OPEN (試験通電)',
+    chartTitle: '5戦略の主要メトリクス比較',
+    chartSuccessRate: '論理成功率 (%)',
+    chartP95: 'p95レイテンシ (ms)',
+    chartCalls: '下流呼び出し数',
+    facts: {
+      retryImprove: (fromPct, toPct, deltaPct, retries, amp) =>
+        `Retryの適用により、論理リクエスト成功率が ${fromPct}% から ${toPct}% に向上しました（+${deltaPct}%）。${retries}回のリトライを実行（呼び出し増幅率: ${amp}倍）。`,
+      retryFutility: (retries, amp, rPct, bPct) =>
+        `Retryにより ${retries} 回の追加呼び出しが発生（呼び出し増幅率: ${amp}倍）しましたが、完全停止のため論理成功率は改善しませんでした（Retry: ${rPct}% vs Baseline: ${bPct}%）。`,
+      retryOverload: (bQueue, rQueue, bTimeout, rTimeout) =>
+        `Retryによりピークキュー滞留数が ${bQueue} から ${rQueue} に増加し、タイムアウト総数も ${bTimeout} から ${rTimeout} に増加しました。`,
+      cbShedding: (rejections, saved, bCalls, cbCalls) =>
+        `Circuit BreakerがOPEN時に ${rejections} 件のリクエストを高速拒否（Fast-Reject）し、対象下流への負荷を ${saved} 件削減しました（${bCalls} → ${cbCalls}）。`,
+      combinedSuppression: (suppressed, rRetries, rcRetries) =>
+        `Retry + Circuit Breakerの組み合わせにより、Breakerオープン中の無駄なリトライを ${suppressed} 件抑制しました（リトライ数: ${rRetries} → ${rcRetries}）。`,
+      failFastSpeedup: (bFailP95, ffFailP95, bOverallP95, ffOverallP95) =>
+        `Fail-Fastにより、失敗リクエストのp95レイテンシが ${bFailP95}ms から ${ffFailP95}ms に短縮されました（全体p95: ${bOverallP95}ms → ${ffOverallP95}ms）。`,
+      allHealthy: (count, reqs, successPct, p95) =>
+        `全${count}戦略が正常稼働し、${reqs}件の論理リクエストを成功率${successPct}%・p95レイテンシ${p95}msで完了しました。`,
+    },
+    strategies: {
+      baseline: {
+        shortName: 'Baseline',
+        fullName: 'Baseline (対策なし)',
+        description:
+          '再試行や遮断を行わず、単一ホップのみ実行。下流のエラーや遅延がそのまま上流へ連鎖します。',
+      },
+      retry: {
+        shortName: 'Retry',
+        fullName: 'Retry (指数バックオフ + ジッター)',
+        description:
+          'Recommendation → Feature DB 間の失敗を最大3回再試行。一時的なスパイクには極めて効果的ですが、長期障害時はリトライストームを引き起こします。',
+      },
+      circuit_breaker: {
+        shortName: 'Circuit Breaker',
+        fullName: 'Circuit Breaker (トリップ遮断)',
+        description:
+          '連続失敗でOPENに遷移し0msで即座に高速拒否。上流スレッドの長時間のブロッキングを防ぎ、クールダウン後にHALF-OPENで復帰を検証します。',
+      },
+      retry_circuit_breaker: {
+        shortName: 'Retry + CB',
+        fullName: 'Retry + Circuit Breaker 統合',
+        description:
+          '一時的障害をRetryで救済しつつ、下流の完全障害時はCircuit BreakerがOPENになって無駄な再試行の連鎖を即時遮断します。',
+      },
+      fail_fast: {
+        shortName: 'Fail-Fast',
+        fullName: 'Fail-Fast (短縮タイムアウト)',
+        description:
+          '下流のタイムアウトを短縮（120ms）し、遅延発生時に即座に諦めてワーカー枠を解放。全体のテールレイテンシ悪化を防ぎます。',
+      },
+    },
+  },
+  topology: {
+    summaryView: '全体サマリー',
+    timelineReplay: 'タイムライン再生',
+    statusHealthy: 'HEALTHY (正常)',
+    statusDegraded: 'DEGRADED (低下)',
+    statusCritical: 'CRITICAL (重大)',
+    statusDown: 'DOWN (停止)',
+    clientLabel: 'Client',
+    clientRole: 'トラフィック生成元',
+    legendTitle: 'ステータス・リソース凡例',
+    legendWorkers: '使用中ワーカー数',
+    legendQueue: 'キュー飽和率',
+    legendCircuit: 'Circuit Breaker状態',
+    faultActiveBadge: '障害注入中',
+    playbackSecond: (sec, total) => `t = ${sec}秒 / ${total}秒`,
+  },
+  playbackBar: {
+    summaryView: '全体サマリー',
+    timelineReplay: 'タイムライン再生',
+    play: '再生',
+    pause: '一時停止',
+    reset: 'リセット',
+    stepBack: '1秒戻る',
+    stepForward: '1秒進む',
+    speed: '再生速度',
+    faultWindow: (start, end) => `障害発生時間帯: ${start}秒 〜 ${end}秒`,
+    faultActiveNow: '障害発生中（下流サービス影響中）',
+  },
+  metricsCards: {
+    logicalSuccessRate: '論理リクエスト成功率',
+    successCountRatio: (success, total) => `(${success} / ${total} リクエスト)`,
+    errorRateBreakdown: 'エラー率と要因内訳',
+    timeouts: 'タイムアウト',
+    queueOverflows: 'キュー溢れ破棄',
+    p95AvgLatency: 'p95 & 平均レイテンシ',
+    splitLatency: (succP95, failP95) => `成功 p95: ${succP95}ms | 失敗 p95: ${failP95}ms`,
+    downstreamCallsResilience: '下流呼び出し数とレジリエンス効果',
+    retriesExecuted: 'リトライ実行数',
+    callAmp: '呼び出し増幅率',
+    cbFastRejections: 'CB高速拒否数',
+  },
+  charts: {
+    successErrorTitle: '成功率・エラー率の推移 (%)',
+    successErrorSub: 'クライアント側から見た毎秒の処理結果',
+    latencyTitle: 'レイテンシ推移 (ms)',
+    latencySub: 'クライアントが体感するp95および平均応答時間',
+    queueTitle: 'キュー滞留数推移',
+    queueSub: '下流ボトルネックによる上流キューの波及滞留',
+    successRateSeries: '成功率 (%)',
+    errorRateSeries: 'エラー率 (%)',
+    p95LatencySeries: 'p95レイテンシ (ms)',
+    avgLatencySeries: '平均レイテンシ (ms)',
+    faultBadge: (start, end) => `障害: ${start}秒〜${end}秒`,
+  },
+  eventLog: {
+    serviceBreakdownTitle: 'サービス別詳細メトリクス',
+    serviceBreakdownSub:
+      '一次呼び出し・リトライ・CB遮断・ワーカー/キュー飽和度の一覧',
+    colService: 'サービス',
+    colCalls: '呼び出し数 (+Retry)',
+    colCbReject: 'CB拒否',
+    colSuccessRate: '成功率',
+    colTimeouts: 'タイムアウト',
+    colP95: 'p95 (ms)',
+    colWorkerQueue: 'ワーカー / キュー',
+    eventStreamTitle: '離散イベントストリーム',
+    eventStreamSub:
+      'シミュレーションエンジンから仮想時刻順に出力されたイベント履歴',
+    filterAll: 'すべてのイベント',
+    colSec: '秒',
+    colTime: '仮想時刻',
+    colEvent: 'イベント種類',
+    colRequest: 'リクエスト',
+    colFromTo: '呼び出し元 → 先',
+    colDetails: '詳細',
+    events: {
+      REQUEST_ARRIVAL: '到着',
+      QUEUE_ENQUEUED: 'キュー投入',
+      PROCESSING_START: '処理開始',
+      DOWNSTREAM_CALL: '下流呼出',
+      RETRY_BACKOFF_COMPLETE: '待機完了',
+      PROCESSING_COMPLETE: '処理完了',
+      REQUEST_FAILURE: 'エラー',
+      REQUEST_TIMEOUT: 'タイムアウト',
+      CIRCUIT_STATE_CHANGE: 'CB状態遷移',
+    },
+  },
+};
