@@ -12,8 +12,8 @@
 
 ## デモ・スクリーンショット
 
-- **公開デモURL**：`https://<your-deployment-domain>.onrender.com`（公開後に実際のURLへ置き換えてください）
-  - `Dockerfile`、`render.yaml`、`fly.toml` を用意しており、デプロイ可能な構成です。
+- **公開デモURL**：`https://<your-deployment-domain>.up.railway.app`（公開後に実際のURLへ置き換えてください）
+  - `Dockerfile`、`railway.json`、`render.yaml`、`fly.toml` を用意しており、デプロイ可能な構成です。
 - **スクリーンショット・GIF**（画像の作成・追加後に掲載してください）：
   - `docs/images/scenario-gallery-comparison.png` — 5戦略の比較表と実測結果に基づく分析
   - `docs/images/topology-timeline-replay.gif` — 障害の連鎖とCircuit Breakerの状態遷移を時系列で再生する様子
