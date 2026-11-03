@@ -1,8 +1,9 @@
 # FailureLab — 分散システムの障害・耐障害性シミュレーター
 
-[![CI](https://github.com/Takafumi122/failure-simulator/actions/workflows/ci.yml/badge.svg)](https://github.com/Takafumi122/failure-simulator/actions)
+[![CI](https://github.com/Takafumi122/failure_simulation/actions/workflows/ci.yml/badge.svg)](https://github.com/Takafumi122/failure_simulation/actions)
 ![Engine](https://img.shields.io/badge/Engine-Go%201.22%20DES%20(v3.0.0--des)-00ADD8)
 ![Frontend](https://img.shields.io/badge/Frontend-React%2019%20%2B%20TypeScript%20%2B%20React%20Flow-61DAFB)
+[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/template)
 
 **FailureLab** は、分散マイクロサービスの障害を再現する、対話型かつ決定論的な**離散イベントシミュレーター（Discrete-Event Simulator：DES）**です。
 
@@ -12,11 +13,24 @@
 
 ## デモ・スクリーンショット
 
-- **公開デモURL**：`https://<your-deployment-domain>.up.railway.app`（公開後に実際のURLへ置き換えてください）
-  - `Dockerfile`、`railway.json`、`render.yaml`、`fly.toml` を用意しており、デプロイ可能な構成です。
-- **スクリーンショット・GIF**（画像の作成・追加後に掲載してください）：
-  - `docs/images/scenario-gallery-comparison.png` — 5戦略の比較表と実測結果に基づく分析
-  - `docs/images/topology-timeline-replay.gif` — 障害の連鎖とCircuit Breakerの状態遷移を時系列で再生する様子
+> 🌐 **公開デモサイト**: [https://failure-simulation-production.up.railway.app](https://failure-simulation-production.up.railway.app)
+>
+> ブラウザから事前定義シナリオを選択して「シミュレーション実行」を押すだけで、5つの耐障害性戦略の同時シミュレーション、結果比較、およびトポロジー再生を体験できます（日本語 / 英語 切替対応）。
+
+### 1. 5戦略の比較表 & 実測結果に基づく分析
+同一トラフィック・同一乱数シード下で、5つの戦略（Baseline / Retry / Circuit Breaker / Retry + CB / Fail-Fast）の成功率、レイテンシ分布（p50/p95/p99）、下流呼び出し増幅率を並列評価します。
+
+![5戦略の比較表と実測結果に基づく分析](docs/images/scenario-gallery-comparison.png)
+
+### 2. トポロジー可視化 & 障害伝播のタイムライン再生
+障害注入（Feature DBの遅延や停止）が上流のワーカープールやキューを圧迫していくカスケード障害の推移や、Circuit Breakerの状態遷移（CLOSED → OPEN → HALF-OPEN）をタイムライン上でインタラクティブに再生・確認できます。
+
+![障害の連鎖とCircuit Breakerの状態遷移を時系列で再生する様子](docs/images/topology-timeline-replay.gif)
+
+### 3. 時系列メトリクス & 離散イベントストリーム
+スループット推移、レイテンシ推移、サービス別ワーカー・キュー使用率、および全リクエスト試行の離散イベントをミリ秒単位で追跡・検証できます。
+
+![時系列メトリクスチャートと離散イベントストリーム](docs/images/metrics-and-events.png)
 
 ---
 
