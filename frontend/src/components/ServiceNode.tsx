@@ -187,7 +187,7 @@ export const ServiceNode: React.FC<NodeProps> = ({ data }) => {
       {/* Metrics Grid */}
       <div className="mt-2 grid grid-cols-2 gap-1.5 rounded-lg bg-slate-950/80 p-2 border border-slate-800/80">
         <div>
-          <div className="text-[10px] text-slate-400">Success Rate</div>
+          <div className="text-[10px] text-slate-400">{t.topology.metricSuccessRate}</div>
           <div
             className={`text-xs font-mono font-bold ${
               d.successRate >= 0.98
@@ -201,7 +201,7 @@ export const ServiceNode: React.FC<NodeProps> = ({ data }) => {
           </div>
         </div>
         <div>
-          <div className="text-[10px] text-slate-400">p95 Latency</div>
+          <div className="text-[10px] text-slate-400">{t.topology.metricP95Latency}</div>
           <div
             className={`text-xs font-mono font-bold ${
               d.p95LatencyMs > 400
@@ -221,7 +221,7 @@ export const ServiceNode: React.FC<NodeProps> = ({ data }) => {
         <div className="mt-2 space-y-1.5">
           <div>
             <div className="flex justify-between text-[10px] text-slate-400 mb-0.5">
-              <span>Workers</span>
+              <span>{t.topology.metricWorkers}</span>
               <span className="font-mono text-slate-300">
                 {d.peakConcurrent}/{d.maxConcurrent}
               </span>
@@ -238,7 +238,7 @@ export const ServiceNode: React.FC<NodeProps> = ({ data }) => {
 
           <div>
             <div className="flex justify-between text-[10px] text-slate-400 mb-0.5">
-              <span>Queue</span>
+              <span>{t.topology.metricQueue}</span>
               <span className="font-mono text-slate-300">
                 {d.peakQueueLength}/{d.queueLimit}
               </span>

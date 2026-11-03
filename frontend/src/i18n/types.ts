@@ -81,10 +81,13 @@ export interface Translations {
     truncatedWarning: string;
     colStrategy: string;
     colLogicalSuccess: string;
+    colErrorRate: string;
     colP95Latency: string;
     colP95Split: string;
     colDownstreamCalls: string;
+    colRetries: string;
     colCbRejections: string;
+    colTimeouts: string;
     colPeakQueue: string;
     retriesLabel: string;
     amplificationLabel: string;
@@ -167,6 +170,10 @@ export interface Translations {
     legendCircuit: string;
     faultActiveBadge: string;
     playbackSecond: (sec: number, total: number) => string;
+    metricSuccessRate: string;
+    metricP95Latency: string;
+    metricWorkers: string;
+    metricQueue: string;
   };
   playbackBar: {
     summaryView: string;

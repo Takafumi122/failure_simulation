@@ -311,13 +311,13 @@ export const StrategyComparison: React.FC<StrategyComparisonProps> = ({
               <tr className="border-b border-slate-800 text-[11px] text-slate-400">
                 <th className="py-2 pr-3">{t.strategyComparison.colStrategy}</th>
                 <th className="py-2 px-2 text-right">{t.strategyComparison.colLogicalSuccess}</th>
-                <th className="py-2 px-2 text-right">Error Rate</th>
+                <th className="py-2 px-2 text-right">{t.strategyComparison.colErrorRate}</th>
                 <th className="py-2 px-2 text-right">{t.strategyComparison.colP95Latency}</th>
                 <th className="py-2 px-2 text-right">{t.strategyComparison.colP95Split}</th>
                 <th className="py-2 px-2 text-right">{t.strategyComparison.colDownstreamCalls}</th>
-                <th className="py-2 px-2 text-right">Retries (Amp)</th>
+                <th className="py-2 px-2 text-right">{t.strategyComparison.colRetries}</th>
                 <th className="py-2 px-2 text-right">{t.strategyComparison.colCbRejections}</th>
-                <th className="py-2 px-2 text-right">Timeouts</th>
+                <th className="py-2 px-2 text-right">{t.strategyComparison.colTimeouts}</th>
                 <th className="py-2 pl-2 text-right">{t.strategyComparison.colPeakQueue}</th>
               </tr>
             </thead>

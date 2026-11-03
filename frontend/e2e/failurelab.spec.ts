@@ -30,7 +30,7 @@ test.describe('FailureLab Portfolio Release E2E', () => {
 
     // Measured observations are rendered from actual simulation results
     const obs = page.getByTestId('measured-observations');
-    await expect(obs).toContainText('Retry improved logical request success rate');
+    await expect(obs).toContainText(/(Retry improved logical request success rate|Retryの適用により)/);
   });
 
   test('2. Switching scenarios updates metrics and Circuit Breaker Recovery shows state transitions', async ({
@@ -48,7 +48,7 @@ test.describe('FailureLab Portfolio Release E2E', () => {
     // Click on Circuit Breaker strategy pill to inspect its active details
     await page.getByTestId('strategy-pill-circuit_breaker').click();
     await expect(page.getByTestId('measured-observations')).toContainText(
-      'Circuit Breaker fast-rejected'
+      /(Circuit Breaker fast-rejected|Circuit BreakerがOPEN時に)/
     );
   });
 
@@ -78,19 +78,21 @@ test.describe('FailureLab Portfolio Release E2E', () => {
   }) => {
     await page.goto('/');
 
-    // Initially in English
+    // Initially in Japanese by default
     await expect(page.getByTestId('lang-btn-en')).toBeVisible();
     await expect(page.getByTestId('lang-btn-ja')).toBeVisible();
-
-    // Switch to Japanese
-    await page.getByTestId('lang-btn-ja').click();
     await expect(page.getByTestId('scenario-gallery')).toBeVisible();
     await expect(page.locator('body')).toContainText('対話型シナリオギャラリー');
     await expect(page.locator('body')).toContainText('5つの耐障害性戦略の並行比較');
 
-    // Switch back to English
+    // Switch to English
     await page.getByTestId('lang-btn-en').click();
     await expect(page.locator('body')).toContainText('Interactive Scenario Gallery');
     await expect(page.locator('body')).toContainText('5 Resilience Strategies Side-by-Side Comparison');
+
+    // Switch back to Japanese
+    await page.getByTestId('lang-btn-ja').click();
+    await expect(page.locator('body')).toContainText('対話型シナリオギャラリー');
+    await expect(page.locator('body')).toContainText('5つの耐障害性戦略の並行比較');
   });
 });

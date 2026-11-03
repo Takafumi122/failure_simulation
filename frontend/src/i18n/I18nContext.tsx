@@ -14,24 +14,32 @@ const STORAGE_KEY = 'failurelab_locale';
 
 function getInitialLocale(): Locale {
   try {
+    // 1. Query parameter override e.g. ?lang=ja or ?lang=en
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const qLang = urlParams.get('lang')?.toLowerCase();
+      if (qLang === 'en' || qLang === 'ja') {
+        localStorage.setItem(STORAGE_KEY, qLang);
+        return qLang;
+      }
+    }
+    // 2. Persisted preference
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved === 'en' || saved === 'ja') {
       return saved;
     }
-    if (typeof navigator !== 'undefined' && navigator.language?.toLowerCase().startsWith('ja')) {
-      return 'ja';
-    }
   } catch {
     // ignore access error in restricted environment
   }
-  return 'en';
+  // 3. Default to Japanese
+  return 'ja';
 }
 
 const I18nContext = createContext<I18nContextValue>({
-  locale: 'en',
+  locale: 'ja',
   setLocale: () => {},
   toggleLocale: () => {},
-  t: en,
+  t: ja,
 });
 
 export const I18nProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
